@@ -27,6 +27,7 @@ namespace Algorithm1
 		private int bound1;
 		private string cursor = "* ";
 		private string item = "! ";
+		private int points;
 
 		public Sector (int l) {
 			level = l;
@@ -34,6 +35,7 @@ namespace Algorithm1
 			mapsector = new string[size, size];
 			bound0 = mapsector.GetUpperBound (0);
 			bound1 = mapsector.GetUpperBound (1);
+			points = 0;
 		}
 
 		public int Level { 
@@ -71,6 +73,11 @@ namespace Algorithm1
 			set { bound1 = value; }
 		}
 
+		public int Points {
+			get { return points; }
+			set { points = value; }
+		}
+
 		public void SetSector() {
 			for (int row = 0; row <= Bound0; row++) {
 				for (int col = 0; col <= Bound1; col++) {
@@ -84,7 +91,7 @@ namespace Algorithm1
 			Random random = new Random ();
 			int NumberOfItems = random.Next (1, Size/2 * Size/2);
 			for (int i = 0; i < NumberOfItems; i++) {
-				MapSector [random.Next (1, Size - 1), random.Next (1, Size - 1)] = item;
+				MapSector [random.Next (Level, Size - 1), random.Next (Level, Size - 1)] = item;
 			}
 
 		}
@@ -95,7 +102,7 @@ namespace Algorithm1
 
 		public void ShowSector() {
 			Console.WriteLine ("Level: {0}", Level);
-			Console.WriteLine ("Size: {0}", Size); // Change this to display player's points
+			Console.WriteLine ("Points: {0}", Points); // Change this to display player's points
 			for (int row = 0; row <= Bound0; row++) {
 				for (int col = 0; col <= Bound1; col++) {
 					Console.Write(MapSector[row,col]);
@@ -113,12 +120,18 @@ namespace Algorithm1
 			SetSector ();
 			Xcurrent = 0;
 			Ycurrent = 0;
+			Points = 0;
 			MapSector [Xcurrent, Ycurrent] = cursor;
 		}
 
 		public void MoveCursor() {
 			Console.Write ("Move(w/a/s/d): ");
-			Move = Convert.ToChar(Console.ReadLine ());
+			string TempMove = Console.ReadLine ();
+			if (TempMove == "w" || TempMove == "a" || TempMove == "s" || TempMove == "d") {
+				Move = Convert.ToChar (TempMove);
+			} else {
+				Move = 'q';
+			}
 			Console.Clear ();
 
 			MapSector [Xcurrent, Ycurrent] = "  ";
@@ -145,7 +158,10 @@ namespace Algorithm1
 			}
 			if (MapSector [Xcurrent, Ycurrent] == "! ") {
 				// Do stuff
-				Level += 1;  // for testing purposes only
+				Points += 1;  // for testing purposes only
+				if (Points == Level) {
+					Level += 1;
+				}
 			}
 			MapSector [Xcurrent, Ycurrent] = cursor;
 		}
