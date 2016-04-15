@@ -20,6 +20,10 @@ namespace Algorithm1
 
 	public class Sector 
 	{
+		//
+		//--: Variables and constructors
+		//
+
 		private int level;
 		private int size;
 		private string[,] mapsector;
@@ -28,6 +32,8 @@ namespace Algorithm1
 		private string cursor = "* ";
 		private string item = "! ";
 		private int points;
+		private int steps;
+		private int numofevents;
 
 		public Sector (int l) {
 			level = l;
@@ -78,6 +84,20 @@ namespace Algorithm1
 			set { points = value; }
 		}
 
+		public int Steps {
+			get { return steps; }
+			set { steps = value; }
+		}
+
+		public int NumOfEvents {
+			get { return numofevents; }
+			set { numofevents = value; }
+		}
+
+		//
+		//--: Methods
+		//
+
 		public void SetSector() {
 			for (int row = 0; row <= Bound0; row++) {
 				for (int col = 0; col <= Bound1; col++) {
@@ -89,9 +109,10 @@ namespace Algorithm1
 
 			// Generate items randomly
 			Random random = new Random ();
-			int NumberOfItems = random.Next (1, Size/2 * Size/2);
+			int NumberOfItems = random.Next (Level, Size/2 * Size/2);
+			NumOfEvents = NumberOfItems;
 			for (int i = 0; i < NumberOfItems; i++) {
-				MapSector [random.Next (Level, Size - 1), random.Next (Level, Size - 1)] = item;
+				MapSector [random.Next (1, Size - 1), random.Next (1, Size - 1)] = item;
 			}
 
 		}
@@ -102,7 +123,9 @@ namespace Algorithm1
 
 		public void ShowSector() {
 			Console.WriteLine ("Level: {0}", Level);
-			Console.WriteLine ("Points: {0}", Points); // Change this to display player's points
+			Console.WriteLine ("Steps: {0}", Steps);
+			Console.WriteLine ("Points: {0}", Points);
+			//Console.WriteLine ("Current position: ({0},{1})", Xcurrent, Ycurrent); // For testing purposes
 			for (int row = 0; row <= Bound0; row++) {
 				for (int col = 0; col <= Bound1; col++) {
 					Console.Write(MapSector[row,col]);
@@ -120,7 +143,7 @@ namespace Algorithm1
 			SetSector ();
 			Xcurrent = 0;
 			Ycurrent = 0;
-			Points = 0;
+			Steps = 100;
 			MapSector [Xcurrent, Ycurrent] = cursor;
 		}
 
@@ -129,8 +152,10 @@ namespace Algorithm1
 			string TempMove = Console.ReadLine ();
 			if (TempMove == "w" || TempMove == "a" || TempMove == "s" || TempMove == "d") {
 				Move = Convert.ToChar (TempMove);
+			} else if (TempMove == "W" || TempMove == "A" || TempMove == "S" || TempMove == "D") {
+				Move = Convert.ToChar (TempMove);
 			} else {
-				Move = 'q';
+				Move = 'q'; // this will do nothing, see the switch below
 			}
 			Console.Clear ();
 
@@ -138,7 +163,7 @@ namespace Algorithm1
 
 			switch (Move) {
 			case 'd':
-				if (Ycurrent != Size)
+				if (Ycurrent < (Size - 1)) // This isn't working for some reason; it throws an out of bounds error
 					Ycurrent += 1;
 				break;
 			case 'a':
@@ -150,18 +175,20 @@ namespace Algorithm1
 					Xcurrent -= 1;
 				break;
 			case 's':
-				if (Xcurrent != Size)
+				if (Xcurrent < (Size - 1)) // This isn't working for some reason; it throws an out of bounds error
 					Xcurrent += 1;
 				break;
 			default:
 				break;
 			}
+
+			// ITEM LOGIC
+
 			if (MapSector [Xcurrent, Ycurrent] == "! ") {
-				// Do stuff
-				Points += 1;  // for testing purposes only
-				if (Points == Level) {
-					Level += 1;
-				}
+				Steps -= 1;
+				DoEvent ();
+			} else {
+				Steps -= 1;
 			}
 			MapSector [Xcurrent, Ycurrent] = cursor;
 		}
@@ -184,6 +211,41 @@ namespace Algorithm1
 		public void NewLevel() {
 			Initialize ();
 			Play ();
+		}
+
+		public void DoEvent() {
+			// Points, Traps, Quests, Special
+			string [] events = new string[] { "point", "point", "point", "point", "trap", "trap", "trap", "point", "point", "Golden Carrot" };
+			bool FoundGoldenCarrot = false;
+			string thisEvent = " ";
+			Random random = new Random ();
+			if (NumOfEvents == 1) {
+				thisEvent = "Golden Carrot";
+			} else {
+				thisEvent = events [random.Next (0, 10)];
+			}
+
+			Console.Clear ();
+			Console.WriteLine ("You landed on a {0}!", thisEvent);
+
+			switch (thisEvent) {
+			case "point":
+				Points += 1;
+				break;
+			case "trap":
+				Points -= random.Next (0, Points);
+				break;
+			case "Golden Carrot":
+				Points += Steps;
+				FoundGoldenCarrot = true;
+				break;
+			default:
+				break;
+			}
+			NumOfEvents -= 1;
+			if (FoundGoldenCarrot == true) { // Make this more complicated
+				Level += 1;
+			}
 		}
 	}
 }
