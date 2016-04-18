@@ -122,15 +122,21 @@ namespace Algorithm1
 		}
 
 		public void ShowSector() {
-			Console.WriteLine ("Level: {0}", Level);
-			Console.WriteLine ("Steps: {0}", Steps);
-			Console.WriteLine ("Points: {0}", Points);
-			//Console.WriteLine ("Current position: ({0},{1})", Xcurrent, Ycurrent); // For testing purposes
-			for (int row = 0; row <= Bound0; row++) {
-				for (int col = 0; col <= Bound1; col++) {
-					Console.Write(MapSector[row,col]);
+			if (Steps == 0) {
+				Console.Clear ();
+				Console.WriteLine ("You lose.");
+				Console.WriteLine ("You scored {0} points.", Points);
+			} else {
+				Console.WriteLine ("Level: {0}", Level);
+				Console.WriteLine ("Steps: {0}", Steps);
+				Console.WriteLine ("Points: {0}", Points);
+				//Console.WriteLine ("Current position: ({0},{1})", Xcurrent, Ycurrent); // For testing purposes
+				for (int row = 0; row <= Bound0; row++) {
+					for (int col = 0; col <= Bound1; col++) {
+						Console.Write (MapSector [row, col]);
+					}
+					Console.WriteLine ();
 				}
-				Console.WriteLine ();
 			}
 		}
 
@@ -163,7 +169,7 @@ namespace Algorithm1
 
 			switch (Move) {
 			case 'd':
-				if (Ycurrent < (Size - 1)) // This isn't working for some reason; it throws an out of bounds error
+				if (Ycurrent < (Size - 1))
 					Ycurrent += 1;
 				break;
 			case 'a':
@@ -175,7 +181,7 @@ namespace Algorithm1
 					Xcurrent -= 1;
 				break;
 			case 's':
-				if (Xcurrent < (Size - 1)) // This isn't working for some reason; it throws an out of bounds error
+				if (Xcurrent < (Size - 1))
 					Xcurrent += 1;
 				break;
 			default:
@@ -215,11 +221,11 @@ namespace Algorithm1
 
 		public void DoEvent() {
 			// Points, Traps, Quests, Special
-			string [] events = new string[] { "point", "point", "point", "point", "trap", "trap", "trap", "point", "point", "Golden Carrot" };
+			string [] events = new string[] { "point", "point", "point", "point", "trap", "trap", "trap", "trap", "point", "Golden Carrot", "Golden Carrot" };
 			bool FoundGoldenCarrot = false;
 			string thisEvent = " ";
 			Random random = new Random ();
-			if (NumOfEvents == 1) {
+			if (NumOfEvents < 2) {
 				thisEvent = "Golden Carrot";
 			} else {
 				thisEvent = events [random.Next (0, 10)];
@@ -233,7 +239,7 @@ namespace Algorithm1
 				Points += 1;
 				break;
 			case "trap":
-				Points -= random.Next (0, Points);
+				Points -= random.Next (0, Points/2);
 				break;
 			case "Golden Carrot":
 				Points += Steps;
